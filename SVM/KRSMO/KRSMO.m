@@ -97,9 +97,9 @@
     double _matchTarget      = _matchPattern.targetValue;
     // Start in fracation
     double _numerator        = _matchTarget * _maxError;
-    double _denominator      = [_mathLib multiplyParentMatrix:_mainPattern.features childMatrix:_mainPattern.features]   +
-                               [_mathLib multiplyParentMatrix:_matchPattern.features childMatrix:_matchPattern.features] +
-                               ( 2 * [_mathLib multiplyParentMatrix:_mainPattern.features childMatrix:_matchPattern.features] );
+    double _denominator      = [_mathLib sumParentMatrix:_mainPattern.features childMatrix:_mainPattern.features]   +
+                               [_mathLib sumParentMatrix:_matchPattern.features childMatrix:_matchPattern.features] +
+                               ( 2 * [_mathLib sumParentMatrix:_mainPattern.features childMatrix:_matchPattern.features] );
     double _newMatchAlpha    = _oldMatchAlpha + ( _numerator / _denominator );
     
     // Checking the max-min limitations (上下限範圍)
@@ -146,6 +146,18 @@
 {
     // Formula : new main alpha = old main alpha + ( main target * match target * ( old match alpha - new match alpha ) )
     return _mainPattern.targetValue + ( _mainPattern.targetValue * _matchPattern.targetValue * ( _matchPattern.alphaValue - _newMatchAlpha ) );
+}
+
+// Use on quickly update weights
+-(NSArray *)_multiplyFeatures:(NSArray *)_features byNumber:(double)_number
+{
+    return [[KRMathLib sharedLib] multiplyMatrix:_features byNumber:_number];
+}
+
+// Matrix + Matrix to be another Matrix
+-(NSArray *)_plusMatrix:(NSArray *)_matrix anotherMatrix:(NSArray *)_anotherMatrix
+{
+    return [[KRMathLib sharedLib] plusMatrix:_matrix anotherMatrix:_anotherMatrix];
 }
 
 // 找出要更新的 Pattern Alphas
@@ -204,18 +216,21 @@
                                                                     matchPattern:_matchPattern
                                                                    newMatchAlpha:_newMatchAlpha];
             
-            // Updating the weights and bias
+            // Updating the weights and bias by used 2 new alphas
+            // First, calculates the delta weights
+            double _mainNumber         = ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue;
+            NSArray *_deltaMainMatrix  = [self _multiplyFeatures:_mainPattern.features byNumber:_mainNumber];
             
+            double _matchNumber        = ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue;
+            NSArray *_deltaMatchMatrix = [self _multiplyFeatures:_matchPattern.features byNumber:_matchNumber];
             
-            // Fetched original pattern and updated the alpha value of match-pattern
-            ((KRPattern *)[self.patterns objectAtIndex:_matchPattern.index]).alphaValue = _newMatchAlpha;
+            NSArray *_deltaWeights     = [self _plusMatrix:_deltaMainMatrix anotherMatrix:_deltaMatchMatrix];
+            // Second, let original weights + delta weights to be new weights array
+            NSArray *_newWeights       = [self _plusMatrix:self.weights anotherMatrix:_deltaWeights];
+            [self.weights removeAllObjects];
+            [self.weights addObjectsFromArray:_newWeights];
             
-            // Removed we chose pattern
-            [_alphas removeObjectAtIndex:_maxIndex];
-            
-            // Then checking all patterns are they all fit KKT conditions ?
-            // If YES, stop the training, If NO, continually recurse this function
-            
+            // Then, quickly updating bias
             
             
         }

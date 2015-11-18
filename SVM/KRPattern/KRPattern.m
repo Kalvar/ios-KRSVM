@@ -14,7 +14,7 @@
 -(double)_calculateKktValueByWeights:(NSArray *)_weights bias:(NSNumber *)_bias features:(NSArray *)_features targetValue:(double)_targetValue
 {
     // Sum( weights x pattern features )
-    double _sum = [[KRMathLib sharedLib] multiplyParentMatrix:_weights childMatrix:_features];
+    double _sum = [[KRMathLib sharedLib] sumParentMatrix:_weights childMatrix:_features];
     return _targetValue * ( _sum + [_bias doubleValue] );
 }
 

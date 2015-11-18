@@ -14,6 +14,8 @@
 -(instancetype)init;
 
 -(NSArray *)sortArray:(NSArray *)_array byKey:(NSString *)_byKey ascending:(BOOL)_ascending;
--(double)multiplyParentMatrix:(NSArray *)_parentMatrix childMatrix:(NSArray *)_childMatrix;
+-(double)sumParentMatrix:(NSArray *)_parentMatrix childMatrix:(NSArray *)_childMatrix;
+-(NSArray *)multiplyMatrix:(NSArray *)_matrix byNumber:(double)_number;
+-(NSArray *)plusMatrix:(NSArray *)_matrix anotherMatrix:(NSArray *)_anotherMatrix;
 
 @end
