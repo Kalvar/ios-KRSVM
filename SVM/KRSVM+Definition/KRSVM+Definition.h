@@ -7,3 +7,5 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "KRMathLib.h"
+#import "KRPattern.h"

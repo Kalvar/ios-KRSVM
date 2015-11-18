@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8E3F30EF1BF89861004FEC88 /* KRPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E3F30EE1BF89861004FEC88 /* KRPattern.m */; settings = {ASSET_TAGS = (); }; };
 		8E575CDC1BAED6D700CCABD3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575CDB1BAED6D700CCABD3 /* main.m */; };
 		8E575CDF1BAED6D700CCABD3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575CDE1BAED6D700CCABD3 /* AppDelegate.m */; };
 		8E575CE21BAED6D700CCABD3 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575CE11BAED6D700CCABD3 /* ViewController.m */; };
@@ -16,6 +17,7 @@
 		8E575CF61BAED6D700CCABD3 /* KRSVMTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575CF51BAED6D700CCABD3 /* KRSVMTests.m */; };
 		8E575D031BAED7FE00CCABD3 /* KRSVM.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575D021BAED7FE00CCABD3 /* KRSVM.m */; };
 		8E575D081BAED8BD00CCABD3 /* KRSMO.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575D071BAED8BD00CCABD3 /* KRSMO.m */; };
+		8EFD04851BFC31700096C8D5 /* KRMathLib.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD04841BFC31700096C8D5 /* KRMathLib.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +31,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8E3F30ED1BF89861004FEC88 /* KRPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRPattern.h; sourceTree = "<group>"; };
+		8E3F30EE1BF89861004FEC88 /* KRPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRPattern.m; sourceTree = "<group>"; };
 		8E575CD61BAED6D700CCABD3 /* KRSVM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KRSVM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E575CDA1BAED6D700CCABD3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E575CDB1BAED6D700CCABD3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -47,6 +51,8 @@
 		8E575D041BAED81000CCABD3 /* KRSVM+Definition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "KRSVM+Definition.h"; sourceTree = "<group>"; };
 		8E575D061BAED8BD00CCABD3 /* KRSMO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRSMO.h; sourceTree = "<group>"; };
 		8E575D071BAED8BD00CCABD3 /* KRSMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRSMO.m; sourceTree = "<group>"; };
+		8EFD04831BFC31700096C8D5 /* KRMathLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRMathLib.h; sourceTree = "<group>"; };
+		8EFD04841BFC31700096C8D5 /* KRMathLib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRMathLib.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +73,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8E3F30EC1BF89861004FEC88 /* KRPattern */ = {
+			isa = PBXGroup;
+			children = (
+				8E3F30ED1BF89861004FEC88 /* KRPattern.h */,
+				8E3F30EE1BF89861004FEC88 /* KRPattern.m */,
+			);
+			path = KRPattern;
+			sourceTree = "<group>";
+		};
 		8E575CCD1BAED6D700CCABD3 = {
 			isa = PBXGroup;
 			children = (
@@ -131,6 +146,8 @@
 			isa = PBXGroup;
 			children = (
 				8E575D001BAED7E200CCABD3 /* KRSVM+Definition */,
+				8EFD04821BFC31470096C8D5 /* KRMathLib */,
+				8E3F30EC1BF89861004FEC88 /* KRPattern */,
 				8E575D051BAED8BD00CCABD3 /* KRSMO */,
 				8E575D011BAED7F500CCABD3 /* KRSVM.h */,
 				8E575D021BAED7FE00CCABD3 /* KRSVM.m */,
@@ -153,6 +170,15 @@
 				8E575D071BAED8BD00CCABD3 /* KRSMO.m */,
 			);
 			path = KRSMO;
+			sourceTree = "<group>";
+		};
+		8EFD04821BFC31470096C8D5 /* KRMathLib */ = {
+			isa = PBXGroup;
+			children = (
+				8EFD04831BFC31700096C8D5 /* KRMathLib.h */,
+				8EFD04841BFC31700096C8D5 /* KRMathLib.m */,
+			);
+			path = KRMathLib;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -199,7 +225,7 @@
 		8E575CCE1BAED6D700CCABD3 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0640;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Kalvar Lin";
 				TargetAttributes = {
 					8E575CD51BAED6D700CCABD3 = {
@@ -255,9 +281,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EFD04851BFC31700096C8D5 /* KRMathLib.m in Sources */,
 				8E575CE21BAED6D700CCABD3 /* ViewController.m in Sources */,
 				8E575D081BAED8BD00CCABD3 /* KRSMO.m in Sources */,
 				8E575D031BAED7FE00CCABD3 /* KRSVM.m in Sources */,
+				8E3F30EF1BF89861004FEC88 /* KRPattern.m in Sources */,
 				8E575CDF1BAED6D700CCABD3 /* AppDelegate.m in Sources */,
 				8E575CDC1BAED6D700CCABD3 /* main.m in Sources */,
 			);
@@ -322,6 +350,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -387,6 +416,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = KRSVM/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kalvar.svm.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -397,6 +427,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = KRSVM/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kalvar.svm.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -415,6 +446,7 @@
 				);
 				INFOPLIST_FILE = KRSVMTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kalvar.svm.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KRSVM.app/KRSVM";
 			};
@@ -430,6 +462,7 @@
 				);
 				INFOPLIST_FILE = KRSVMTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.kalvar.svm.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/KRSVM.app/KRSVM";
 			};
@@ -454,6 +487,7 @@
 				8E575CFB1BAED6D700CCABD3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8E575CFC1BAED6D700CCABD3 /* Build configuration list for PBXNativeTarget "KRSVMTests" */ = {
 			isa = XCConfigurationList;
@@ -462,6 +496,7 @@
 				8E575CFE1BAED6D700CCABD3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
