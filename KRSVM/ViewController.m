@@ -26,10 +26,17 @@
     [smo addPatterns:@[@2.0f, @0.0f] target:1.0f];  // x3
     [smo addPatterns:@[@3.0f, @0.0f] target:1.0f];  // x4
     
-    [smo addBiase:@0.0f]; // one bias
-    [smo addWeights:@[@0.0f, @0.0f]]; // 多少輸入維度, 就有多少個權重維度
+    // One bias likes a net of neural network
+    [smo addBiase:@0.0f];
     
-    [smo classifyWithCompletion:^(BOOL success, NSArray *weights, NSArray *biases, NSArray *outputs, NSInteger totalIterations) {
+    // One input value by one weight that likes inputs & weights of neural network
+    [smo addWeights:@[@0.0f, @0.0f]];
+    
+    // Setup the groups of classification and the target-value of group
+    [smo addGroupForTarget:-1.0f];
+    [smo addGroupForTarget:1.0f];
+    
+    [smo classifyWithCompletion:^(BOOL success, NSArray *weights, NSArray *biases, NSDictionary *outputs, NSInteger totalIterations) {
         
     }];
     

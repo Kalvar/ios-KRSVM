@@ -6,10 +6,10 @@
 //  Copyright (c) 2015年 Kalvar Lin. All rights reserved.
 //
 
-#import "KRPattern.h"
+#import "KRSVMPattern.h"
 #import "KRMathLib.h"
 
-@implementation KRPattern (fixKKT)
+@implementation KRSVMPattern (fixKKT)
 
 -(double)_calculateKktValueByWeights:(NSArray *)_weights bias:(NSNumber *)_bias features:(NSArray *)_features targetValue:(double)_targetValue
 {
@@ -45,14 +45,14 @@
 
 @end
 
-@implementation KRPattern
+@implementation KRSVMPattern
 
 +(instancetype)sharedPattern
 {
     static dispatch_once_t pred;
-    static KRPattern *_object = nil;
+    static KRSVMPattern *_object = nil;
     dispatch_once(&pred, ^{
-        _object = [[KRPattern alloc] init];
+        _object = [[KRSVMPattern alloc] init];
     });
     return _object;
 }
@@ -100,6 +100,11 @@
     double _kktValue = [self _calculateKktValueByWeights:_weights bias:_bias features:_features targetValue:_targetValue];
     _isMatchKkt      = [self _isMatchKktValue:_kktValue constValue:_constValue patternAlpha:_alphaValue];
     return _isMatchKkt;
+}
+
+-(NSNumber *)getClassifyTarget
+{
+    return [NSNumber numberWithDouble:_targetValue];
 }
 
 @end

@@ -8,7 +8,8 @@
 
 #import "KRSMO.h"
 
-#define DEFAULT_SETTINGS_ALPHA_VALUE 0.0f
+#define DEFAULT_PATTERN_TARGET_VALUE 0.0f
+#define DEFAULT_PATTERN_ALPHA_VALUE  0.0f
 
 typedef enum KRSMOTrainingTypes
 {
@@ -48,6 +49,43 @@ typedef enum KRSMOTrainingTypes
 
 @end
 
+@implementation KRSMO (fixMaths)
+
+-(double)_sgn:(double)_value
+{
+    return ( _value >= 0.0f ) ? 1.0f : -1.0f;
+}
+
+@end
+
+@implementation KRSMO (fixBlocks)
+
+-(void)_blockCompletedTrainingBySucceed:(BOOL)_isSucceed finalResults:(NSDictionary *)_results
+{
+    if( nil != self.trainingCompletion )
+    {
+        self.trainingCompletion(_isSucceed, self.weights, self.biases, _results, self.iteration);
+    }
+}
+
+-(void)_blockPerIteration
+{
+    if( nil != self.perIteration )
+    {
+        self.perIteration(self.iteration, self.weights, self.biases);
+    }
+}
+
+-(void)_blockDirectOutputForTargetGroups:(NSDictionary *)_targetGroups finalResults:(NSDictionary *)_results
+{
+    if( nil != self.directOutput )
+    {
+        self.directOutput(self.weights, self.biases, _targetGroups, _results);
+    }
+}
+
+@end
+
 @implementation KRSMO (fixTrains)
 
 -(NSArray *)_calculateErrorsAtPatterns:(NSMutableArray *)_patterns
@@ -56,13 +94,13 @@ typedef enum KRSMOTrainingTypes
     NSMutableArray *_patternErrors = [NSMutableArray new];
     double _biasValue              = [[_biases firstObject] doubleValue];
     NSInteger _patternIndex        = 0;
-    for( KRPattern *_pattern in _patterns )
+    for( KRSVMPattern *_pattern in _patterns )
     {
         // 計算每個 Pattern 的 Error 值
         double _errorValue    = 0.0f;
         double _patternTarget = _pattern.targetValue;
         NSInteger _otherIndex = 0;
-        for( KRPattern *_otherPattern in _patterns )
+        for( KRSVMPattern *_otherPattern in _patterns )
         {
             // 求 xi 與其它 xj 點的乘積 (含 xi 自己)
             NSInteger _valueIndex = 0;
@@ -98,7 +136,7 @@ typedef enum KRSMOTrainingTypes
     NSNumber *_choseBias         = [self.biases firstObject];
     double _constValue           = self.constValue;
     NSArray *_patterns           = self.patterns;
-    for( KRPattern *_pattern in _patterns )
+    for( KRSVMPattern *_pattern in _patterns )
     {
         BOOL _isMatchKkt = [_pattern isMatchKktByWeights:_choseWeights bias:_choseBias constValue:_constValue];
         // 不符合 KKT 條件
@@ -122,7 +160,7 @@ typedef enum KRSMOTrainingTypes
 }
 
 // 計算 New Matched Pattern Alpha Value & 判斷其是否符合上下限範圍
--(double)_calculateNewMatchAlphaAtMainPattern:(KRPattern *)_mainPattern matchPattern:(KRPattern *)_matchPattern maxError:(double)_maxError
+-(double)_calculateNewMatchAlphaAtMainPattern:(KRSVMPattern *)_mainPattern matchPattern:(KRSVMPattern *)_matchPattern maxError:(double)_maxError
 {
     KRMathLib *_mathLib      = [KRMathLib sharedLib];
     double _constValue       = self.constValue;
@@ -180,7 +218,7 @@ typedef enum KRSMOTrainingTypes
 }
 
 // 更新 New Main Pattern Alpha Value
--(double)_calculateNewMainAlphaAtMainPattern:(KRPattern *)_mainPattern matchPattern:(KRPattern *)_matchPattern newMatchAlpha:(double)_newMatchAlpha
+-(double)_calculateNewMainAlphaAtMainPattern:(KRSVMPattern *)_mainPattern matchPattern:(KRSVMPattern *)_matchPattern newMatchAlpha:(double)_newMatchAlpha
 {
     // Formula : new main alpha = old main alpha + ( main target * match target * ( old match alpha - new match alpha ) )
     return _mainPattern.targetValue + ( _mainPattern.targetValue * _matchPattern.targetValue * ( _matchPattern.alphaValue - _newMatchAlpha ) );
@@ -193,14 +231,14 @@ typedef enum KRSMOTrainingTypes
 }
 
 // Random picking a pattern and must avoid the exited index of picked before
--(KRPattern *)_randomPickPatternAvoidIndex:(NSInteger)_avoidIndex maxIndex:(NSInteger)_maxIndex
+-(KRSVMPattern *)_randomPickPatternAvoidIndex:(NSInteger)_avoidIndex maxIndex:(NSInteger)_maxIndex
 {
     NSInteger _pickedIndex = [[KRMathLib sharedLib] randomMax:_maxIndex min:0];
     if( _pickedIndex == _avoidIndex )
     {
         [self _randomPickPatternAvoidIndex:_avoidIndex maxIndex:_maxIndex];
     }
-    return (KRPattern *)[self.patterns objectAtIndex:_pickedIndex];
+    return (KRSVMPattern *)[self.patterns objectAtIndex:_pickedIndex];
 }
 
 // Update the weights & bias by patterns of not matched KKT and return training status
@@ -218,7 +256,7 @@ typedef enum KRSMOTrainingTypes
     {
         // Random choosing or directly choosing in here (_choseIndex)
         NSInteger _choseIndex    = 0;
-        KRPattern *_mainPattern  = (KRPattern *)[_alphas objectAtIndex:_choseIndex];
+        KRSVMPattern *_mainPattern  = (KRSVMPattern *)[_alphas objectAtIndex:_choseIndex];
         double _mainPatternError = _mainPattern.errorValue;
         // Removed we chose pattern
         [_alphas removeObjectAtIndex:_choseIndex];
@@ -226,7 +264,7 @@ typedef enum KRSMOTrainingTypes
         NSInteger _index         = -1;
         NSInteger _maxIndex      = -1;
         double _maxErrorValue    = -1.0f;
-        for( KRPattern *_pattern in _alphas )
+        for( KRSVMPattern *_pattern in _alphas )
         {
             ++_index;
             // Finding the index of max error-distance
@@ -241,7 +279,7 @@ typedef enum KRSMOTrainingTypes
         // If we successfully chose a pattern
         if( _maxIndex >= 0 )
         {
-            KRPattern *_matchPattern = (KRPattern *)[_alphas objectAtIndex:_maxIndex];
+            KRSVMPattern *_matchPattern = (KRSVMPattern *)[_alphas objectAtIndex:_maxIndex];
             double _newMatchAlpha    = [self _calculateNewMatchAlphaAtMainPattern:_mainPattern
                                                                      matchPattern:_matchPattern
                                                                          maxError:_maxErrorValue];
@@ -304,8 +342,8 @@ typedef enum KRSMOTrainingTypes
             [self addBiase:[NSNumber numberWithDouble:_newBias]];
             
             // Fetched original patterns and updated the alpha value of pattern
-            ((KRPattern *)[self.patterns objectAtIndex:_mainPattern.index]).alphaValue  = _newMainAlpha;
-            ((KRPattern *)[self.patterns objectAtIndex:_matchPattern.index]).alphaValue = _newMatchAlpha;
+            ((KRSVMPattern *)[self.patterns objectAtIndex:_mainPattern.index]).alphaValue  = _newMainAlpha;
+            ((KRSVMPattern *)[self.patterns objectAtIndex:_matchPattern.index]).alphaValue = _newMatchAlpha;
             
             // Removed we chose pattern
             [_alphas removeObjectAtIndex:_maxIndex];
@@ -331,8 +369,8 @@ typedef enum KRSMOTrainingTypes
         // If we only have 1 pattern to update, then we just random pick anyone pattern to do match-update
         // 任意挑 1 個出來搭配，之後重新跑一次這裡的遞迴
         NSLog(@"_alphas : %@", _alphas);
-        KRPattern *_mainPattern  = (KRPattern *)[_alphas firstObject];
-        KRPattern *_matchPattern = [self _randomPickPatternAvoidIndex:_mainPattern.index maxIndex:( [self.patterns count] - 1 )];
+        KRSVMPattern *_mainPattern  = (KRSVMPattern *)[_alphas firstObject];
+        KRSVMPattern *_matchPattern = [self _randomPickPatternAvoidIndex:_mainPattern.index maxIndex:( [self.patterns count] - 1 )];
         if( nil != _matchPattern )
         {
             [_alphas addObject:_mainPattern];
@@ -340,6 +378,26 @@ typedef enum KRSMOTrainingTypes
         }
     }
     return KRSMOTrainingTypeIsFailed;
+}
+
+// 分類 Patterns 到總 Groups results 裡，並回傳分類後的群聚結果, return [哪一群與目標值] = [KRPatterns]
+-(NSDictionary *)_classifyPatterns:(NSArray *)_patterns
+{
+    // 從每一個 Pattern 的 Target Value 來逐一判斷該點是屬於哪一群
+    NSMutableDictionary *_groups = self.groups;
+    for( KRSVMPattern *_finalPattern in _patterns )
+    {
+        NSMutableArray *_targetGroup = [_groups objectForKey:[_finalPattern getClassifyTarget]];
+        if( nil != _targetGroup )
+        {
+            // Directly adding, it based on memory reference that working in here
+            [_targetGroup addObject:_finalPattern];
+        }
+        
+        // Maybe for extended other methods of classification ?
+        // ... But not now
+    }
+    return _groups;
 }
 
 // 找出要更新的 Pattern Alphas
@@ -370,35 +428,23 @@ typedef enum KRSMOTrainingTypes
             // 迭代數達到上限
             if( self.iteration >= self.maxIteration )
             {
-                if( nil != self.trainingCompletion )
-                {
-                    self.trainingCompletion(YES, self.weights, self.biases, @[], self.iteration);
-                    
-                    //typedef void(^KRSMOCompletion)(BOOL success, NSArray *weights, NSArray *biases, NSArray *outputs, NSInteger totalIterations);
-                    //typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSArray *outputs);
-                    
-                }
-                
+                [self _blockCompletedTrainingBySucceed:YES finalResults:[self _classifyPatterns:self.patterns]];
             }
             else
             {
                 // Continually training for next iteration
-                if( nil != self.perIteration )
-                {
-                    self.perIteration(self.iteration, self.weights, self.biases);
-                }
+                [self _blockPerIteration];
                 [self classify];
             }
             break;
         case KRSMOTrainingTypeIsAllPatternsMatchedKKT:
             // 所有點都符合 KKT 條件
-            
-            //self.trainingCompletion(YES, self.weights, self.biases, @[], self.iteration);
+            [self _blockCompletedTrainingBySucceed:YES finalResults:[self _classifyPatterns:self.patterns]];
             break;
         default:
             // KRSMOTrainingTypeIsFailed
-            
-            //self.trainingCompletion(NO, self.weights, self.biases, @[], self.iteration);
+            // Directly passing the original classified (or not classify) groups
+            [self _blockCompletedTrainingBySucceed:NO finalResults:self.groups];
             break;
     }
 }
@@ -425,37 +471,52 @@ typedef enum KRSMOTrainingTypes
         _patterns           = [NSMutableArray new];
         _weights            = [NSMutableArray new];
         _biases             = [NSMutableArray new];
+        _groups             = [NSMutableDictionary new];
         
         _constValue         = 1;
-        _toleranceError     = 0.001f; // 鬆馳函數 ?
+        _toleranceError     = 0.001f; // 鬆馳函數 (容認誤差)
         _maxIteration       = 5000;
         
         _trainingCompletion = nil;
         _perIteration       = nil;
+        _directOutput       = nil;
         
         _iteration          = 0;
     }
     return self;
 }
 
-#pragma --mark Training Methods
--(void)addPatterns:(NSArray *)_inputs target:(double)_output alpha:(double)_alpha
+#pragma --mark Settings Methods
+-(KRSVMPattern *)createPatternByFeatures:(NSArray *)_features target:(double)_output alpha:(double)_alpha index:(NSInteger)_index
 {
-    KRPattern *_pattern     = [[KRPattern alloc] init];
-    [_pattern addFeatures:_inputs];
+    KRSVMPattern *_pattern     = [[KRSVMPattern alloc] init];
+    [_pattern addFeatures:_features];
     _pattern.targetValue    = _output;
     _pattern.alphaValue     = _alpha;
-    _pattern.index          = [_patterns count];
+    _pattern.index          = _index;
     _pattern.toleranceError = _toleranceError;
+    return _pattern;
+}
+
+-(KRSVMPattern *)createPatternByFeatures:(NSArray *)_features
+{
+    return [self createPatternByFeatures:_features
+                                  target:DEFAULT_PATTERN_TARGET_VALUE
+                                   alpha:DEFAULT_PATTERN_ALPHA_VALUE
+                                   index:[_patterns count]];
+}
+
+-(void)addPatterns:(NSArray *)_inputs target:(double)_output alpha:(double)_alpha
+{
     // Add the KRPattern object
-    [_patterns addObject:_pattern];
+    [_patterns addObject:[self createPatternByFeatures:_inputs target:_output alpha:_alpha index:[_patterns count]]];
 }
 
 -(void)addPatterns:(NSArray *)_inputs target:(double)_output
 {
     [self addPatterns:_inputs
                target:_output
-                alpha:DEFAULT_SETTINGS_ALPHA_VALUE];
+                alpha:DEFAULT_PATTERN_ALPHA_VALUE];
 }
 
 -(void)addBiase:(NSNumber *)_lineBias
@@ -468,6 +529,14 @@ typedef enum KRSMOTrainingTypes
     [_weights addObject:[_lineWeights copy]];
 }
 
+-(void)addGroupForTarget:(double)_groupTarget
+{
+    // 這裡設定了想分成幾群及該群的目標值
+    // Value is that group patterns, Key is that group target value
+    [_groups setValue:[NSMutableArray new] forKey:[[NSNumber numberWithDouble:_groupTarget] copy]];
+}
+
+#pragma --mark Training Methods
 -(void)classify
 {
     ++_iteration;
@@ -486,16 +555,31 @@ typedef enum KRSMOTrainingTypes
     [self classify];
 }
 
--(void)classifyPatterns:(NSArray *)_patterns completion:(KRSMODirectOutput)_completion
+-(void)classifyPatterns:(NSArray *)_samples completion:(KRSMODirectOutput)_completion
 {
+    // Directly output the target value by formula : yi = (W^T * xi + b) or (W^T * xi - b)
     
-    if( nil != _completion )
+#warning calculating the target value
+    
+//    這裡再想想怎麼設計會比較好 ~ ....
+    
+    NSMutableArray *_waitPatterns = [NSMutableArray new];
+    for( NSArray *_features in _samples )
     {
-        //_completion(_weights, _biases, );
+        KRSVMPattern *_pattern = [self createPatternByFeatures:_features];
+        [_waitPatterns addObject:_pattern];
     }
+    
+    
+    
+    
+    // 直接 Output @[KRPatterns]，讓外部用 KRPattern.targetValue 來知道其分到哪一類
+    [self _blockDirectOutputForTargetGroups:@{}
+                               finalResults:[self _classifyPatterns:_waitPatterns]];
+    
 }
 
--(void)verifyPatterns:(NSArray *)_patterns
+-(void)verifyPatterns:(NSArray *)_samples
 {
 
 }
@@ -510,6 +594,7 @@ typedef enum KRSMOTrainingTypes
     _iteration          = 0;
     _trainingCompletion = nil;
     _perIteration       = nil;
+    _directOutput       = nil;
     [_patterns removeAllObjects];
     [_weights removeAllObjects];
     [_biases removeAllObjects];
@@ -524,6 +609,11 @@ typedef enum KRSMOTrainingTypes
 -(void)setPerIteration:(KRSMOIteration)_theBlock
 {
     _perIteration = _theBlock;
+}
+
+-(void)setDirectOutput:(KRSMODirectOutput)_theBlock
+{
+    _directOutput = _theBlock;
 }
 
 @end

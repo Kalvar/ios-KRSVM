@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8E3F30EF1BF89861004FEC88 /* KRPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E3F30EE1BF89861004FEC88 /* KRPattern.m */; settings = {ASSET_TAGS = (); }; };
 		8E575CDC1BAED6D700CCABD3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575CDB1BAED6D700CCABD3 /* main.m */; };
 		8E575CDF1BAED6D700CCABD3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575CDE1BAED6D700CCABD3 /* AppDelegate.m */; };
 		8E575CE21BAED6D700CCABD3 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575CE11BAED6D700CCABD3 /* ViewController.m */; };
@@ -18,6 +17,7 @@
 		8E575D031BAED7FE00CCABD3 /* KRSVM.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575D021BAED7FE00CCABD3 /* KRSVM.m */; };
 		8E575D081BAED8BD00CCABD3 /* KRSMO.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575D071BAED8BD00CCABD3 /* KRSMO.m */; };
 		8EFD04851BFC31700096C8D5 /* KRMathLib.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD04841BFC31700096C8D5 /* KRMathLib.m */; settings = {ASSET_TAGS = (); }; };
+		8EFD04891BFF8BE90096C8D5 /* KRSVMPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD04881BFF8BE90096C8D5 /* KRSVMPattern.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,8 +31,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		8E3F30ED1BF89861004FEC88 /* KRPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRPattern.h; sourceTree = "<group>"; };
-		8E3F30EE1BF89861004FEC88 /* KRPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRPattern.m; sourceTree = "<group>"; };
 		8E575CD61BAED6D700CCABD3 /* KRSVM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KRSVM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E575CDA1BAED6D700CCABD3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E575CDB1BAED6D700CCABD3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -53,6 +51,8 @@
 		8E575D071BAED8BD00CCABD3 /* KRSMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRSMO.m; sourceTree = "<group>"; };
 		8EFD04831BFC31700096C8D5 /* KRMathLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRMathLib.h; sourceTree = "<group>"; };
 		8EFD04841BFC31700096C8D5 /* KRMathLib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRMathLib.m; sourceTree = "<group>"; };
+		8EFD04871BFF8BE90096C8D5 /* KRSVMPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRSVMPattern.h; sourceTree = "<group>"; };
+		8EFD04881BFF8BE90096C8D5 /* KRSVMPattern.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRSVMPattern.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,15 +73,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		8E3F30EC1BF89861004FEC88 /* KRPattern */ = {
-			isa = PBXGroup;
-			children = (
-				8E3F30ED1BF89861004FEC88 /* KRPattern.h */,
-				8E3F30EE1BF89861004FEC88 /* KRPattern.m */,
-			);
-			path = KRPattern;
-			sourceTree = "<group>";
-		};
 		8E575CCD1BAED6D700CCABD3 = {
 			isa = PBXGroup;
 			children = (
@@ -147,7 +138,7 @@
 			children = (
 				8E575D001BAED7E200CCABD3 /* KRSVM+Definition */,
 				8EFD04821BFC31470096C8D5 /* KRMathLib */,
-				8E3F30EC1BF89861004FEC88 /* KRPattern */,
+				8EFD04861BFF8BE90096C8D5 /* KRSVMPattern */,
 				8E575D051BAED8BD00CCABD3 /* KRSMO */,
 				8E575D011BAED7F500CCABD3 /* KRSVM.h */,
 				8E575D021BAED7FE00CCABD3 /* KRSVM.m */,
@@ -179,6 +170,15 @@
 				8EFD04841BFC31700096C8D5 /* KRMathLib.m */,
 			);
 			path = KRMathLib;
+			sourceTree = "<group>";
+		};
+		8EFD04861BFF8BE90096C8D5 /* KRSVMPattern */ = {
+			isa = PBXGroup;
+			children = (
+				8EFD04871BFF8BE90096C8D5 /* KRSVMPattern.h */,
+				8EFD04881BFF8BE90096C8D5 /* KRSVMPattern.m */,
+			);
+			path = KRSVMPattern;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -282,10 +282,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EFD04851BFC31700096C8D5 /* KRMathLib.m in Sources */,
+				8EFD04891BFF8BE90096C8D5 /* KRSVMPattern.m in Sources */,
 				8E575CE21BAED6D700CCABD3 /* ViewController.m in Sources */,
 				8E575D081BAED8BD00CCABD3 /* KRSMO.m in Sources */,
 				8E575D031BAED7FE00CCABD3 /* KRSVM.m in Sources */,
-				8E3F30EF1BF89861004FEC88 /* KRPattern.m in Sources */,
 				8E575CDF1BAED6D700CCABD3 /* AppDelegate.m in Sources */,
 				8E575CDC1BAED6D700CCABD3 /* main.m in Sources */,
 			);

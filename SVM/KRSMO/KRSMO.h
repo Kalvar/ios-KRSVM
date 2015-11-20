@@ -8,9 +8,9 @@
 
 #import "KRSVM+Definition.h"
 
-typedef void(^KRSMOCompletion)(BOOL success, NSArray *weights, NSArray *biases, NSArray *outputs, NSInteger totalIterations);
+typedef void(^KRSMOCompletion)(BOOL success, NSArray *weights, NSArray *biases, NSDictionary *groups, NSInteger totalIterations);
 typedef void(^KRSMOIteration)(NSInteger iteration, NSArray *weights, NSArray *biases);
-typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSArray *outputs);
+typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSDictionary *targetGroups, NSDictionary *allGroups);
 
 @interface KRSMO : NSObject
 
@@ -23,26 +23,35 @@ typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSArray *out
 
 @property (nonatomic, copy) KRSMOCompletion trainingCompletion;
 @property (nonatomic, copy) KRSMOIteration perIteration;
+@property (nonatomic, copy) KRSMODirectOutput directOutput;
+
+// It records all targets of classification that means how many groups we wanna have
+@property (nonatomic, strong) NSMutableDictionary *groups;
 
 +(instancetype)sharedSMO;
 -(instancetype)init;
 
-#pragma --mark Training Methods
+#pragma --mark Settings Methods
+-(KRSVMPattern *)createPatternByFeatures:(NSArray *)_features target:(double)_output alpha:(double)_alpha index:(NSInteger)_index;
+-(KRSVMPattern *)createPatternByFeatures:(NSArray *)_features;
 -(void)addPatterns:(NSArray *)_inputs target:(double)_output alpha:(double)_alpha;
 -(void)addPatterns:(NSArray *)_inputs target:(double)_output;
 -(void)addBiase:(NSNumber *)_lineBias;
 -(void)addWeights:(NSArray *)_lineWeights;
+-(void)addGroupForTarget:(double)_groupTarget;
 
+#pragma --mark Training Methods
 -(void)classify;
 -(void)classifyWithCompletion:(KRSMOCompletion)_completion;
--(void)classifyPatterns:(NSArray *)_patterns completion:(KRSMODirectOutput)_completion;
--(void)verifyPatterns:(NSArray *)_patterns;
+-(void)classifyPatterns:(NSArray *)_samples completion:(KRSMODirectOutput)_completion;
+-(void)verifyPatterns:(NSArray *)_samples;
 -(void)print;
 -(void)clean;
 
 #pragma --mark Blocks
 -(void)setTrainingCompletion:(KRSMOCompletion)_theBlock;
 -(void)setPerIteration:(KRSMOIteration)_theBlock;
+-(void)setDirectOutput:(KRSMODirectOutput)_theBlock;
 
 
 @end

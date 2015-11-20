@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface KRPattern : NSObject<NSCopying>
+@interface KRSVMPattern : NSObject<NSCopying>
 
 @property (nonatomic, strong) NSMutableArray *features;
 @property (nonatomic, assign) double targetValue;
@@ -24,6 +24,7 @@
 
 -(void)addFeatures:(NSArray *)_featureVectors;
 -(BOOL)isMatchKktByWeights:(NSArray *)_weights bias:(NSNumber *)_bias constValue:(double)_constValue;
+-(NSNumber *)getClassifyTarget;
 
 @end
 
