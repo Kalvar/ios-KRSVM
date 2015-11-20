@@ -14,23 +14,25 @@
 -(double)_calculateKktValueByWeights:(NSArray *)_weights bias:(NSNumber *)_bias features:(NSArray *)_features targetValue:(double)_targetValue
 {
     // Sum( weights x pattern features )
-    double _sum = [[KRMathLib sharedLib] sumParentMatrix:_weights childMatrix:_features];
+    double _sum = [[KRMathLib sharedLib] sumMatrix:_weights anotherMatrix:_features];
     return _targetValue * ( _sum + [_bias doubleValue] );
 }
 
 // 進行 KKT 條件判斷
 -(BOOL)_isMatchKktValue:(double)_kktValue constValue:(double)_constValue patternAlpha:(double)_patternAlpha
 {
-    BOOL _isMatched = YES;
-    if( _patternAlpha == 0.0f && _kktValue >= 1.0f )
+    BOOL _isMatched        = YES;
+    double _toleranceError = self.toleranceError;
+    if( _patternAlpha == 0.0f && (_kktValue + _toleranceError) >= 1.0f )
     {
         
     }
-    else if( _patternAlpha == _constValue && _kktValue <= 1.0f )
+    else if( _patternAlpha == _constValue && (_kktValue - _toleranceError) <= 1.0f )
     {
         
     }
-    else if( 0.0f < _patternAlpha && _patternAlpha < _constValue && _kktValue == 1.0f )
+    // _kktValue == 1.0f
+    else if( 0.0f < _patternAlpha && _patternAlpha < _constValue && fabs(_kktValue) - 1.0f <= _toleranceError )
     {
         
     }
@@ -60,12 +62,13 @@
     self = [super init];
     if( self )
     {
-        _features    = [NSMutableArray new];
-        _targetValue = 0.0f;
-        _alphaValue  = 0.0f;
-        _errorValue  = 0.0f;
-        _isMatchKkt  = NO;
-        _index       = 0;
+        _features       = [NSMutableArray new];
+        _targetValue    = 0.0f;
+        _alphaValue     = 0.0f;
+        _errorValue     = 0.0f;
+        _toleranceError = 0.0f;
+        _isMatchKkt     = NO;
+        _index          = 0;
     }
     return self;
 }

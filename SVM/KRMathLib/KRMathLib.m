@@ -29,13 +29,26 @@
     return self;
 }
 
+@end
+
+@implementation KRMathLib (fixNumber)
+
+-(NSInteger)randomMax:(NSInteger)_maxValue min:(NSInteger)_minValue
+{
+    return ( arc4random() / ( RAND_MAX * 2.0f ) ) * (_maxValue - _minValue) + _minValue;;
+}
+
+@end
+
+@implementation KRMathLib (fixArray)
+
 -(NSArray *)sortArray:(NSArray *)_array byKey:(NSString *)_byKey ascending:(BOOL)_ascending
 {
     return [_array sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:_byKey ascending:_ascending]]];
 }
 
 // ex : [1, 2]^T * [3, 4]
--(double)sumParentMatrix:(NSArray *)_parentMatrix childMatrix:(NSArray *)_childMatrix
+-(double)sumMatrix:(NSArray *)_parentMatrix anotherMatrix:(NSArray *)_childMatrix
 {
     double _sum      = 0.0f;
     NSInteger _index = 0;
@@ -43,6 +56,16 @@
     {
         _sum += [_value doubleValue] * [[_childMatrix objectAtIndex:_index] doubleValue];
         ++_index;
+    }
+    return _sum;
+}
+
+-(double)sumArray:(NSArray *)_array
+{
+    double _sum = 0.0f;
+    for( NSNumber *_value in _array )
+    {
+        _sum += [_value doubleValue];
     }
     return _sum;
 }

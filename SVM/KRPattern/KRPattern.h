@@ -14,6 +14,7 @@
 @property (nonatomic, assign) double targetValue;
 @property (nonatomic, assign) double alphaValue;
 @property (nonatomic, assign) double errorValue;
+@property (nonatomic, assign) double toleranceError;
 @property (nonatomic, assign) BOOL isMatchKkt;
 // To record what index number in patterns of parent class and it could be ID Key
 @property (nonatomic, assign) NSInteger index;

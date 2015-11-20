@@ -10,6 +10,44 @@
 
 #define DEFAULT_SETTINGS_ALPHA_VALUE 0.0f
 
+typedef enum KRSMOTrainingTypes
+{
+    // One iteration done
+    KRSMOTrainingTypeIsOneIterationFinished = 0,
+    // All pattern matchs KKT
+    KRSMOTrainingTypeIsAllPatternsMatchedKKT,
+    // Training failed
+    KRSMOTrainingTypeIsFailed
+}KRSMOTrainingTypes;
+
+@interface KRSMO ()
+
+@property (nonatomic, assign) NSInteger iteration;
+
+@end
+
+@implementation KRSMO (fixMatrix)
+
+// Use on quickly update weights
+-(NSArray *)_multiplyFeatures:(NSArray *)_features byNumber:(double)_number
+{
+    return [[KRMathLib sharedLib] multiplyMatrix:_features byNumber:_number];
+}
+
+// Matrix + Matrix to be another Matrix
+-(NSArray *)_plusMatrix:(NSArray *)_matrix anotherMatrix:(NSArray *)_anotherMatrix
+{
+    return [[KRMathLib sharedLib] plusMatrix:_matrix anotherMatrix:_anotherMatrix];
+}
+
+// Doing X^T * X
+-(double)_sumMatrix:(NSArray *)_matrix anotherMatrix:(NSArray *)_anotherMatrix
+{
+    return [[KRMathLib sharedLib] sumMatrix:_matrix anotherMatrix:_anotherMatrix];
+}
+
+@end
+
 @implementation KRSMO (fixTrains)
 
 -(NSArray *)_calculateErrorsAtPatterns:(NSMutableArray *)_patterns
@@ -97,9 +135,9 @@
     double _matchTarget      = _matchPattern.targetValue;
     // Start in fracation
     double _numerator        = _matchTarget * _maxError;
-    double _denominator      = [_mathLib sumParentMatrix:_mainPattern.features childMatrix:_mainPattern.features]   +
-                               [_mathLib sumParentMatrix:_matchPattern.features childMatrix:_matchPattern.features] +
-                               ( 2 * [_mathLib sumParentMatrix:_mainPattern.features childMatrix:_matchPattern.features] );
+    double _denominator      = [_mathLib sumMatrix:_mainPattern.features anotherMatrix:_mainPattern.features]   +
+                               [_mathLib sumMatrix:_matchPattern.features anotherMatrix:_matchPattern.features] +
+                               ( 2 * [_mathLib sumMatrix:_mainPattern.features anotherMatrix:_matchPattern.features] );
     double _newMatchAlpha    = _oldMatchAlpha + ( _numerator / _denominator );
     
     // Checking the max-min limitations (上下限範圍)
@@ -148,40 +186,35 @@
     return _mainPattern.targetValue + ( _mainPattern.targetValue * _matchPattern.targetValue * ( _matchPattern.alphaValue - _newMatchAlpha ) );
 }
 
-// Use on quickly update weights
--(NSArray *)_multiplyFeatures:(NSArray *)_features byNumber:(double)_number
+// 判斷 New Alpha Value 是否在接受範圍裡 ( Used on quickly update bias )
+-(BOOL)_isAcceptAlphaValue:(double)_alphaValue
 {
-    return [[KRMathLib sharedLib] multiplyMatrix:_features byNumber:_number];
+    return ( _alphaValue > 0.0f && _alphaValue < self.constValue );
 }
 
-// Matrix + Matrix to be another Matrix
--(NSArray *)_plusMatrix:(NSArray *)_matrix anotherMatrix:(NSArray *)_anotherMatrix
+// Random picking a pattern and must avoid the exited index of picked before
+-(KRPattern *)_randomPickPatternAvoidIndex:(NSInteger)_avoidIndex maxIndex:(NSInteger)_maxIndex
 {
-    return [[KRMathLib sharedLib] plusMatrix:_matrix anotherMatrix:_anotherMatrix];
-}
-
-// 找出要更新的 Pattern Alphas
--(void)_updateAlphasByWaitUpdateAlphas:(NSArray *)_waitUpdates
-{
-    if( [_waitUpdates count] < 1 )
+    NSInteger _pickedIndex = [[KRMathLib sharedLib] randomMax:_maxIndex min:0];
+    if( _pickedIndex == _avoidIndex )
     {
-        return;
+        [self _randomPickPatternAvoidIndex:_avoidIndex maxIndex:_maxIndex];
     }
-    /*
-     * @ 更新方法與步驟
-     *   - 1. 在一堆不符合 KKT 條件的點裡，任意隨機選 1 點來做主要更新點，之後依序比較每一個點，再照排序選出 2 點誤差距離最大的那一個點來做「搭配更新」的點，
-     *        而如最大誤差距離有好幾個都一樣大，就能採用順序第 1 個 或 最後 1 個 或 隨機選取 的方式來選擇「搭配更新」的點。
-     *
-     *   - 2. 再用這 2 點更新後的 Alpha 值去更新 Weights & Bias
-     *
-     *   - 3. 將更新好的 Weights & Bias 再重新全部運算一次所有 Patterns 是否都符合 KKT 條件 : 
-     *        @ YES = 訓練完成，收斂
-     *        @ NO  = 再回到第 1 點重新執行，但此時那一堆不符合 KKT 條件的點裡，不包含已經挑出做過更新的點
-     */
-    NSMutableArray *_alphas  = [_waitUpdates mutableCopy];
-    _waitUpdates             = nil;
+    return (KRPattern *)[self.patterns objectAtIndex:_pickedIndex];
+}
+
+// Update the weights & bias by patterns of not matched KKT and return training status
+-(KRSMOTrainingTypes)_updateWeightsByWaitUpdateAlphas:(NSMutableArray *)_alphas
+{
+    NSInteger _alphaCount = [_alphas count];
+    // 如果為空，代表完成本次迭代訓練，但所有 Patterns 都還未全部符合 KKT 條件
+    if( _alphaCount < 1 )
+    {
+        return KRSMOTrainingTypeIsOneIterationFinished;
+    }
+    
     // If we still have over 2 patterns can do match-update task
-    if( [_alphas count] > 1 )
+    if( _alphaCount > 1 )
     {
         // Random choosing or directly choosing in here (_choseIndex)
         NSInteger _choseIndex    = 0;
@@ -216,8 +249,9 @@
                                                                     matchPattern:_matchPattern
                                                                    newMatchAlpha:_newMatchAlpha];
             
-            // Updating the weights and bias by used 2 new alphas
-            // First, calculates the delta weights
+            // Quickly updating the weights and bias by used 2 new alphas
+            // First, calculates the delta weights, Formula :
+            // delta weights = (new alpha 1 - old alpha 1) * target1 * x1 + (new alpha 2 - old alpha 2) * target2 * x2
             double _mainNumber         = ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue;
             NSArray *_deltaMainMatrix  = [self _multiplyFeatures:_mainPattern.features byNumber:_mainNumber];
             
@@ -225,22 +259,148 @@
             NSArray *_deltaMatchMatrix = [self _multiplyFeatures:_matchPattern.features byNumber:_matchNumber];
             
             NSArray *_deltaWeights     = [self _plusMatrix:_deltaMainMatrix anotherMatrix:_deltaMatchMatrix];
-            // Second, let original weights + delta weights to be new weights array
-            NSArray *_newWeights       = [self _plusMatrix:self.weights anotherMatrix:_deltaWeights];
+            
+            // Second, let original weights + delta weights to be new weights array, Formula :
+            // new weights = old weights + delta weights
+            NSArray *_newWeights       = [self _plusMatrix:[self.weights firstObject] anotherMatrix:_deltaWeights];
             [self.weights removeAllObjects];
-            [self.weights addObjectsFromArray:_newWeights];
+            [self addWeights:_newWeights];
             
-            // Then, quickly updating bias
+            // Then, updating bias via 2 patterns (Main & Match), Formula :
+            // new bias 1 = old bias - error1 - (new alpha 1 - old alpha 1) * target1 * (x1^T * x1) - (new alpha2 - old alpha2) * target2 * (x2^T * x1)
+            double _biasValue   = [[self.biases firstObject] doubleValue];
+            // Calculating the main-pattern bias
+            double _newMainBias = _biasValue
+            - _mainPattern.errorValue
+            - ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [self _sumMatrix:_mainPattern.features anotherMatrix:_mainPattern.features] )
+            - ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [self _sumMatrix:_matchPattern.features anotherMatrix:_mainPattern.features] );
             
+            // new bias 2 = old bias - error2 - (new alpha 1 - old alpha 1) * target1 * (x1^T * x2) - (new alpha2 - old alpha2) * target2 * (x2^T * x2)
+            // Calculatin the match-pattern bias
+            double _newMatchBias = _biasValue
+            - _matchPattern.errorValue
+            - ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [self _sumMatrix:_mainPattern.features anotherMatrix:_matchPattern.features] )
+            - ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [self _sumMatrix:_matchPattern.features anotherMatrix:_matchPattern.features] );
             
+            // Then, to choose the final bias or to get the average value of biases
+            _mainPattern.alphaValue  = _newMainAlpha;
+            _matchPattern.alphaValue = _newMatchAlpha;
+            double _newBias          = 0.0f;
+            if( [self _isAcceptAlphaValue:_newMainAlpha] )
+            {
+                _newBias = _newMainBias;
+            }
+            else if( [self _isAcceptAlphaValue:_newMatchAlpha] )
+            {
+                _newBias = _newMatchBias;
+            }
+            else
+            {
+                _newBias = ( _newMainBias + _newMatchBias ) * 0.5f;
+            }
+            
+            // Updated original bias
+            [self.biases removeAllObjects];
+            [self addBiase:[NSNumber numberWithDouble:_newBias]];
+            
+            // Fetched original patterns and updated the alpha value of pattern
+            ((KRPattern *)[self.patterns objectAtIndex:_mainPattern.index]).alphaValue  = _newMainAlpha;
+            ((KRPattern *)[self.patterns objectAtIndex:_matchPattern.index]).alphaValue = _newMatchAlpha;
+            
+            // Removed we chose pattern
+            [_alphas removeObjectAtIndex:_maxIndex];
+            
+            // Then checking all patterns are they all fit KKT conditions ?
+            // If YES, stop the training then return YES, If NO, continually recurse this function
+            NSArray *_notMatchKkts = [self _findPatternsNotMatchKktAndFoundThenStop:YES];
+            if( [_notMatchKkts count] > 0 )
+            {
+                // 將其它不符合 KKT 條件的點都再重新進行更新 weights & bias 運算，直至所有點都運算完畢，才 Return YES 完成 1 迭代
+                [self _updateWeightsByWaitUpdateAlphas:_alphas];
+            }
+            else
+            {
+                // Since we return YES it means that we done 1 iteration and we finished all of " not match KKT patterns updated "
+                // 更新完所有不符合 KKT 條件的點，同時代表完成完整的 1 迭代運算就 return YES
+                return KRSMOTrainingTypeIsAllPatternsMatchedKKT;
+            }
         }
     }
     else
     {
         // If we only have 1 pattern to update, then we just random pick anyone pattern to do match-update
-        
+        // 任意挑 1 個出來搭配，之後重新跑一次這裡的遞迴
+        NSLog(@"_alphas : %@", _alphas);
+        KRPattern *_mainPattern  = (KRPattern *)[_alphas firstObject];
+        KRPattern *_matchPattern = [self _randomPickPatternAvoidIndex:_mainPattern.index maxIndex:( [self.patterns count] - 1 )];
+        if( nil != _matchPattern )
+        {
+            [_alphas addObject:_mainPattern];
+            [self _updateWeightsByWaitUpdateAlphas:_alphas];
+        }
     }
-    
+    return KRSMOTrainingTypeIsFailed;
+}
+
+// 找出要更新的 Pattern Alphas
+-(void)_findWannaUpdateAlphasByWaitUpdateAlphas:(NSArray *)_waitUpdates
+{
+    if( [_waitUpdates count] < 1 )
+    {
+        return;
+    }
+    /*
+     * @ 更新方法與步驟
+     *   - 1. 在一堆不符合 KKT 條件的點裡，任意隨機選 1 點來做主要更新點，之後依序比較每一個點，再照排序選出 2 點誤差距離最大的那一個點來做「搭配更新」的點，
+     *        而如最大誤差距離有好幾個都一樣大，就能採用順序第 1 個 或 最後 1 個 或 隨機選取 的方式來選擇「搭配更新」的點。
+     *
+     *   - 2. 再用這 2 點更新後的 Alpha 值去更新 Weights & Bias
+     *
+     *   - 3. 將更新好的 Weights & Bias 再重新全部運算一次所有 Patterns 是否都符合 KKT 條件 : 
+     *        @ YES = 訓練完成，收斂
+     *        @ NO  = 再回到第 1 點重新執行，但此時那一堆不符合 KKT 條件的點裡，不包含已經挑出做過更新的點
+     */
+    NSMutableArray *_alphas            = [_waitUpdates mutableCopy];
+    _waitUpdates                       = nil;
+    KRSMOTrainingTypes _trainingResult = [self _updateWeightsByWaitUpdateAlphas:_alphas];
+    // 判斷是否需要停止迭代或要繼續下一迭代的訓練
+    switch ( _trainingResult )
+    {
+        case KRSMOTrainingTypeIsOneIterationFinished:
+            // 迭代數達到上限
+            if( self.iteration >= self.maxIteration )
+            {
+                if( nil != self.trainingCompletion )
+                {
+                    self.trainingCompletion(YES, self.weights, self.biases, @[], self.iteration);
+                    
+                    //typedef void(^KRSMOCompletion)(BOOL success, NSArray *weights, NSArray *biases, NSArray *outputs, NSInteger totalIterations);
+                    //typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSArray *outputs);
+                    
+                }
+                
+            }
+            else
+            {
+                // Continually training for next iteration
+                if( nil != self.perIteration )
+                {
+                    self.perIteration(self.iteration, self.weights, self.biases);
+                }
+                [self classify];
+            }
+            break;
+        case KRSMOTrainingTypeIsAllPatternsMatchedKKT:
+            // 所有點都符合 KKT 條件
+            
+            //self.trainingCompletion(YES, self.weights, self.biases, @[], self.iteration);
+            break;
+        default:
+            // KRSMOTrainingTypeIsFailed
+            
+            //self.trainingCompletion(NO, self.weights, self.biases, @[], self.iteration);
+            break;
+    }
 }
 
 @end
@@ -272,6 +432,8 @@
         
         _trainingCompletion = nil;
         _perIteration       = nil;
+        
+        _iteration          = 0;
     }
     return self;
 }
@@ -279,11 +441,12 @@
 #pragma --mark Training Methods
 -(void)addPatterns:(NSArray *)_inputs target:(double)_output alpha:(double)_alpha
 {
-    KRPattern *_pattern  = [[KRPattern alloc] init];
+    KRPattern *_pattern     = [[KRPattern alloc] init];
     [_pattern addFeatures:_inputs];
-    _pattern.targetValue = _output;
-    _pattern.alphaValue  = _alpha;
-    _pattern.index       = [_patterns count];
+    _pattern.targetValue    = _output;
+    _pattern.alphaValue     = _alpha;
+    _pattern.index          = [_patterns count];
+    _pattern.toleranceError = _toleranceError;
     // Add the KRPattern object
     [_patterns addObject:_pattern];
 }
@@ -307,11 +470,14 @@
 
 -(void)classify
 {
+    ++_iteration;
     NSArray *_errors      = [self _calculateErrorsAtPatterns:_patterns];
     NSLog(@"_errors : %@", _errors);
+    
     NSArray *_waitUpdates = [self _findAllPatternsNotMatchKkt];
     NSLog(@"_waitUpdates : %@", _waitUpdates);
-    [self _updateAlphasByWaitUpdateAlphas:_waitUpdates];
+    
+    [self _findWannaUpdateAlphasByWaitUpdateAlphas:_waitUpdates];
 }
 
 -(void)classifyWithCompletion:(KRSMOCompletion)_completion
@@ -341,6 +507,9 @@
 
 -(void)clean
 {
+    _iteration          = 0;
+    _trainingCompletion = nil;
+    _perIteration       = nil;
     [_patterns removeAllObjects];
     [_weights removeAllObjects];
     [_biases removeAllObjects];

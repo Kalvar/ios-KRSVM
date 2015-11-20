@@ -17,7 +17,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    KRSMO *smo = [[KRSVM sharedSVM] useSMO];
+    
+    KRSMO *smo         = [[KRSVM sharedSVM] useSMO];
+    smo.toleranceError = 0.001f;
     
     [smo addPatterns:@[@0.0f, @0.0f] target:-1.0f]; // x1
     [smo addPatterns:@[@2.0f, @2.0f] target:-1.0f]; // x2
