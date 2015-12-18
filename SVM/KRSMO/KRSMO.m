@@ -291,8 +291,6 @@ typedef enum KRSMOTrainingTypes
                                                                     matchPattern:_matchPattern
                                                                    newMatchAlpha:_newMatchAlpha];
             
-            //*
-            // New method
             // Quickly updating the weights and bias by used 2 new alphas
             // First, calculates the delta weights, Formula :
             // delta weights = (new alpha 1 - old alpha 1) * target1 * x1 + (new alpha 2 - old alpha 2) * target2 * x2
@@ -306,62 +304,10 @@ typedef enum KRSMOTrainingTypes
             // Second, let original weights + delta weights to be new weights array, Formula :
             // new weights = old weights + delta weights
             NSArray *_newWeights       = [self _plusMatrix:[self.weights firstObject] anotherMatrix:_deltaWeights];
-             //*/
             
-            /*
-            // Old method
-            ((KRSVMPattern *)[self.patterns objectAtIndex:_mainPattern.index]).alphaValue  = _newMainAlpha;
-            ((KRSVMPattern *)[self.patterns objectAtIndex:_matchPattern.index]).alphaValue = _newMatchAlpha;
-            
-            NSArray *_newWeights = @[@0.0f, @0.0f];
-            for( KRSVMPattern *_svmPattern in self.patterns )
-            {
-                NSArray *_w = [self _multiplyFeatures:_svmPattern.features byNumber:(_svmPattern.alphaValue * _svmPattern.targetValue)];
-                _newWeights = [self _plusMatrix:_w anotherMatrix:_newWeights];
-            }
-            */
-            
-            NSLog(@"_newWeights : %@", _newWeights);
             [self.weights removeAllObjects];
             [self addWeights:_newWeights];
             
-            //NSLog(@"self.weights : %@", self.weights);
-            
-            /*
-            // For old formula of updating bias
-            double _biasMaxValue = -MAXFLOAT;
-            double _biasMinValue = MAXFLOAT;
-            
-            NSInteger _biasMaxIndex = 0;
-            NSInteger _biasMinIndex = 0;
-            
-            for( KRSVMPattern *_svmPattern in self.patterns )
-            {
-                double _sum = [self _sumMatrix:_newWeights anotherMatrix:_svmPattern.features];
-                // is +1 that to find MIN summed result
-                if( _svmPattern.isPlusSignal )
-                {
-                    if( _sum < _biasMinValue )
-                    {
-                        _biasMinValue = _sum;
-                        _biasMinIndex = _svmPattern.index;
-                    }
-                }
-                // is -1 that to find MAX summed result
-                else
-                {
-                    if( _sum > _biasMaxValue )
-                    {
-                        _biasMaxValue = _sum;
-                        _biasMaxIndex = _svmPattern.index;
-                    }
-                }
-            }
-            
-            double _newBias = -( _biasMaxValue + _biasMinValue ) / 2.0f;
-             */
-            
-            //*
             // Then, updating bias via 2 patterns (Main & Match), Formula :
             // new bias 1 = old bias - error1 - (new alpha 1 - old alpha 1) * target1 * (x1^T * x1) - (new alpha2 - old alpha2) * target2 * (x2^T * x1)
             double _biasValue   = [[self.biases firstObject] doubleValue];
@@ -373,24 +319,12 @@ typedef enum KRSMOTrainingTypes
             - ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [self _sumMatrix:_mainPattern.features anotherMatrix:_mainPattern.features] )
             - ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [self _sumMatrix:_matchPattern.features anotherMatrix:_mainPattern.features] );
             
-            // 網路上寫的新方式 ?
-//            double _newMainBias = _biasValue
-//            + _mainPattern.errorValue
-//            + ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [self _sumMatrix:_mainPattern.features anotherMatrix:_mainPattern.features] )
-//            + ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [self _sumMatrix:_matchPattern.features anotherMatrix:_mainPattern.features] );
-            
             // new bias 2 = old bias - error2 - (new alpha 1 - old alpha 1) * target1 * (x1^T * x2) - (new alpha2 - old alpha2) * target2 * (x2^T * x2)
             // Calculatin the match-pattern bias
             double _newMatchBias = _biasValue
             - _matchPattern.errorValue
             - ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [self _sumMatrix:_mainPattern.features anotherMatrix:_matchPattern.features] )
             - ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [self _sumMatrix:_matchPattern.features anotherMatrix:_matchPattern.features] );
-            
-            // 網路方法 (會讓 b 無限增大, Not Working)
-//            double _newMatchBias = _biasValue
-//            + _matchPattern.errorValue
-//            + ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [self _sumMatrix:_mainPattern.features anotherMatrix:_matchPattern.features] )
-//            + ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [self _sumMatrix:_matchPattern.features anotherMatrix:_matchPattern.features] );
             
             // Then, to choose the final bias or to get the average value of biases
             _mainPattern.alphaValue  = _newMainAlpha;
@@ -408,7 +342,6 @@ typedef enum KRSMOTrainingTypes
             {
                 _newBias = ( _newMainBias + _newMatchBias ) * 0.5f;
             }
-             //*/
             
             // Updated original bias
             [self.biases removeAllObjects];
@@ -440,42 +373,6 @@ typedef enum KRSMOTrainingTypes
     }
     else
     {
-        
-        //振維 : 在隨機選擇配對的點時，好像是要選擇「相異訊號」的點來做更新搭配，如果都是同訊號，就會無法正確更新 ... (但一開始在訓練所有數據時，在選擇 2 個搭配點時，是不用管訊號狀況的 )
-        /*
-        // Another choosing method :
-        // ex : 剩 x1 不符合 KKT, 就進入迴圈去 Looping 尋找「相異訊號」且其 fabs( Error Value ) 為最小值的 Pattern 出來當 Match Pattern ...
-        // 該 Error Value 是先前就依照當前的 Weights 計算好的值
-        
-        KRSVMPattern *_mainPattern = (KRSVMPattern *)[_alphas firstObject];
-        NSLog(@"_mainPattern error : %f", _mainPattern.errorValue);
-        NSInteger _minIndex        = 0;
-        double _minError           = MAXFLOAT;
-        for( KRSVMPattern *_pattern in self.patterns )
-        {
-            if( _pattern.index != _mainPattern.index && ( _mainPattern.isPlusSignal != _pattern.isPlusSignal ) ) 
-            {
-                if( _pattern.errorValue < _minError )
-                {
-                    _minError = _pattern.errorValue;
-                    _minIndex = _pattern.index;
-                }
-                
-                NSLog(@"_pattern[%li] error : %f", _pattern.index, _pattern.errorValue);
-            }
-            
-        }
-        
-        NSLog(@"_minError : %f, _minIndex : %li", _minError, _minIndex);
-        
-        [_alphas addObject:[self.patterns objectAtIndex:_minIndex]];
-        NSLog(@"_alphas : %@", _alphas);
-        
-        NSLog(@"\n\n");
-        return [self _updateWeightsByWaitUpdateAlphas:_alphas];
-         */
-        
-        //*
         // If we only have 1 pattern to update, then we just random pick anyone pattern to do match-update
         // 任意挑 1 個出來搭配，之後重新跑一次這裡的遞迴
         //NSLog(@"_alphas : %@", _alphas);
@@ -486,8 +383,6 @@ typedef enum KRSMOTrainingTypes
             [_alphas addObject:_mainPattern];
             return [self _updateWeightsByWaitUpdateAlphas:_alphas];
         }
-         //*/
-        
     }
     return KRSMOTrainingTypeIsFailed;
 }
@@ -675,14 +570,6 @@ typedef enum KRSMOTrainingTypes
 -(void)classifyPatterns:(NSArray *)_samples completion:(KRSMODirectOutput)_completion
 {
     // Directly output the target value by formula : yi = (W^T * xi + b) or (W^T * xi - b)
-    
-#warning calculating the target value
-    
-    
-    
-    
-    //啊哈哈，Target Value 完成分群失敗，都是正數 ... 再來細看算式和邏輯，應該是哪裡有問題 ...
-    
     // 這裡再想想怎麼設計會比較好 ~ ....
     NSArray *_choseWeights        = [_weights firstObject];
     double _biasValue             = [[_biases firstObject] doubleValue];
