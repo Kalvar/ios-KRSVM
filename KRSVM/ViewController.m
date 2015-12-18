@@ -20,6 +20,8 @@
     
     KRSMO *smo         = [[KRSVM sharedSVM] useSMO];
     smo.toleranceError = 0.001f;
+    smo.maxIteration   = 1000;
+    smo.constValue     = 1;
     
     [smo addPatterns:@[@0.0f, @0.0f] target:-1.0f]; // x1
     [smo addPatterns:@[@2.0f, @2.0f] target:-1.0f]; // x2
@@ -27,7 +29,7 @@
     [smo addPatterns:@[@3.0f, @0.0f] target:1.0f];  // x4
     
     // One bias likes a net of neural network
-    [smo addBiase:@0.0f];
+    [smo addBias:@0.0f];
     
     // One input value by one weight that likes inputs & weights of neural network
     [smo addWeights:@[@0.0f, @0.0f]];
@@ -36,8 +38,19 @@
     [smo addGroupForTarget:-1.0f];
     [smo addGroupForTarget:1.0f];
     
-    [smo classifyWithCompletion:^(BOOL success, NSArray *weights, NSArray *biases, NSDictionary *outputs, NSInteger totalIterations) {
+    [smo classifyWithPerIteration:^(NSInteger iteration, NSArray *weights, NSArray *biases) {
+        //NSLog(@"%li Iteration weights : %@", iteration, weights);
+        //NSLog(@"%li Iteration biases : %@", iteration, biases);
+    } completion:^(BOOL success, NSArray *weights, NSArray *biases, NSDictionary *groups, NSInteger totalIterations) {
+        NSLog(@"===============================================");
+        NSLog(@"%li Completion weights : %@", totalIterations, weights);
+        NSLog(@"%li Completion biases : %@", totalIterations, biases);
+        NSLog(@"%li Completion groups : %@", totalIterations, groups);
         
+        // Verify & Directly Output
+        [smo classifyPatterns:@[@[@2.0f, @2.0f], @[@3.0f, @0.0f]] completion:^(NSArray *weights, NSArray *biases, NSDictionary *targetGroups, NSDictionary *allGroups) {
+            
+        }];
     }];
     
     [smo print];

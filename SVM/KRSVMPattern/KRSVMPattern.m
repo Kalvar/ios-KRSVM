@@ -69,6 +69,7 @@
         _toleranceError = 0.0f;
         _isMatchKkt     = NO;
         _index          = 0;
+        _isPlusSignal   = NO;
     }
     return self;
 }
@@ -76,7 +77,7 @@
 // Implementing NSCopying protocal to achieve copy function
 -(instancetype)copyWithZone:(NSZone *)zone
 {
-    typeof(KRPattern) *_copiedObject = [[[self class] alloc] init];
+    typeof(KRSVMPattern) *_copiedObject = [[[self class] alloc] init];
     if ( _copiedObject )
     {
         [_copiedObject setFeatures:[_features copyWithZone:zone]];
@@ -105,6 +106,12 @@
 -(NSNumber *)getClassifyTarget
 {
     return [NSNumber numberWithDouble:_targetValue];
+}
+
+#pragma --mark Getters
+-(BOOL)isPlusSignal
+{
+    return _targetValue >= 0.0f;
 }
 
 @end

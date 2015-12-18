@@ -18,6 +18,13 @@
 @property (nonatomic, assign) BOOL isMatchKkt;
 // To record what index number in patterns of parent class and it could be ID Key
 @property (nonatomic, assign) NSInteger index;
+// To identify the singal of target value is + or -
+@property (nonatomic, assign) BOOL isPlusSignal;
+
+#warning 想想看是否真的需要記錄次數 ? 是否要設一個隨時能停止隨機更新的機制 ?
+// To record how many times been main updated pattern
+//@property (nonatomic, assign) NSInteger beenMainTimes;
+// To record how many times been match updated pattern
 
 +(instancetype)sharedPattern;
 -(instancetype)init;

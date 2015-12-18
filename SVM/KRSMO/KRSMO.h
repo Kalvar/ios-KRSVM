@@ -36,13 +36,14 @@ typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSDictionary
 -(KRSVMPattern *)createPatternByFeatures:(NSArray *)_features;
 -(void)addPatterns:(NSArray *)_inputs target:(double)_output alpha:(double)_alpha;
 -(void)addPatterns:(NSArray *)_inputs target:(double)_output;
--(void)addBiase:(NSNumber *)_lineBias;
+-(void)addBias:(NSNumber *)_lineBias;
 -(void)addWeights:(NSArray *)_lineWeights;
 -(void)addGroupForTarget:(double)_groupTarget;
 
 #pragma --mark Training Methods
 -(void)classify;
 -(void)classifyWithCompletion:(KRSMOCompletion)_completion;
+-(void)classifyWithPerIteration:(KRSMOIteration)_eachIteration completion:(KRSMOCompletion)_completion;
 -(void)classifyPatterns:(NSArray *)_samples completion:(KRSMODirectOutput)_completion;
 -(void)verifyPatterns:(NSArray *)_samples;
 -(void)print;
