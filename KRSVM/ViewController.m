@@ -22,6 +22,7 @@
     smo.toleranceError = 0.001f;
     smo.maxIteration   = 1000;
     smo.constValue     = 1;
+    [smo.kernel useLinear];
     
     [smo addPatterns:@[@0.0f, @0.0f] target:-1.0f]; // x1
     [smo addPatterns:@[@2.0f, @2.0f] target:-1.0f]; // x2

@@ -20,6 +20,7 @@ typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSDictionary
 @property (nonatomic, assign) double constValue;
 @property (nonatomic, assign) double toleranceError;
 @property (nonatomic, assign) NSInteger maxIteration;
+@property (nonatomic, strong) KRSVMKernel *kernel;
 
 @property (nonatomic, copy) KRSMOCompletion trainingCompletion;
 @property (nonatomic, copy) KRSMOIteration perIteration;

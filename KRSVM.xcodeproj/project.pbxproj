@@ -16,6 +16,7 @@
 		8E575CF61BAED6D700CCABD3 /* KRSVMTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575CF51BAED6D700CCABD3 /* KRSVMTests.m */; };
 		8E575D031BAED7FE00CCABD3 /* KRSVM.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575D021BAED7FE00CCABD3 /* KRSVM.m */; };
 		8E575D081BAED8BD00CCABD3 /* KRSMO.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E575D071BAED8BD00CCABD3 /* KRSMO.m */; };
+		8EC4428F1C29550600004BB0 /* KRSVMKernel.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EC4428E1C29550600004BB0 /* KRSVMKernel.m */; settings = {ASSET_TAGS = (); }; };
 		8EFD04851BFC31700096C8D5 /* KRMathLib.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD04841BFC31700096C8D5 /* KRMathLib.m */; settings = {ASSET_TAGS = (); }; };
 		8EFD04891BFF8BE90096C8D5 /* KRSVMPattern.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EFD04881BFF8BE90096C8D5 /* KRSVMPattern.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
@@ -49,6 +50,8 @@
 		8E575D041BAED81000CCABD3 /* KRSVM+Definition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "KRSVM+Definition.h"; sourceTree = "<group>"; };
 		8E575D061BAED8BD00CCABD3 /* KRSMO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRSMO.h; sourceTree = "<group>"; };
 		8E575D071BAED8BD00CCABD3 /* KRSMO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRSMO.m; sourceTree = "<group>"; };
+		8EC4428D1C29550600004BB0 /* KRSVMKernel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRSVMKernel.h; sourceTree = "<group>"; };
+		8EC4428E1C29550600004BB0 /* KRSVMKernel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRSVMKernel.m; sourceTree = "<group>"; };
 		8EFD04831BFC31700096C8D5 /* KRMathLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRMathLib.h; sourceTree = "<group>"; };
 		8EFD04841BFC31700096C8D5 /* KRMathLib.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KRMathLib.m; sourceTree = "<group>"; };
 		8EFD04871BFF8BE90096C8D5 /* KRSVMPattern.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KRSVMPattern.h; sourceTree = "<group>"; };
@@ -139,6 +142,7 @@
 				8E575D001BAED7E200CCABD3 /* KRSVM+Definition */,
 				8EFD04821BFC31470096C8D5 /* KRMathLib */,
 				8EFD04861BFF8BE90096C8D5 /* KRSVMPattern */,
+				8EC4428C1C2954FE00004BB0 /* KRSVMKernel */,
 				8E575D051BAED8BD00CCABD3 /* KRSMO */,
 				8E575D011BAED7F500CCABD3 /* KRSVM.h */,
 				8E575D021BAED7FE00CCABD3 /* KRSVM.m */,
@@ -161,6 +165,15 @@
 				8E575D071BAED8BD00CCABD3 /* KRSMO.m */,
 			);
 			path = KRSMO;
+			sourceTree = "<group>";
+		};
+		8EC4428C1C2954FE00004BB0 /* KRSVMKernel */ = {
+			isa = PBXGroup;
+			children = (
+				8EC4428D1C29550600004BB0 /* KRSVMKernel.h */,
+				8EC4428E1C29550600004BB0 /* KRSVMKernel.m */,
+			);
+			path = KRSVMKernel;
 			sourceTree = "<group>";
 		};
 		8EFD04821BFC31470096C8D5 /* KRMathLib */ = {
@@ -285,6 +298,7 @@
 				8EFD04891BFF8BE90096C8D5 /* KRSVMPattern.m in Sources */,
 				8E575CE21BAED6D700CCABD3 /* ViewController.m in Sources */,
 				8E575D081BAED8BD00CCABD3 /* KRSMO.m in Sources */,
+				8EC4428F1C29550600004BB0 /* KRSVMKernel.m in Sources */,
 				8E575D031BAED7FE00CCABD3 /* KRSVM.m in Sources */,
 				8E575CDF1BAED6D700CCABD3 /* AppDelegate.m in Sources */,
 				8E575CDC1BAED6D700CCABD3 /* main.m in Sources */,
