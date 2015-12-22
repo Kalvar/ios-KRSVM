@@ -10,7 +10,7 @@
 
 typedef void(^KRSMOCompletion)(BOOL success, NSArray *weights, NSArray *biases, NSDictionary *groups, NSInteger totalIterations);
 typedef void(^KRSMOIteration)(NSInteger iteration, NSArray *weights, NSArray *biases);
-typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSDictionary *targetGroups, NSDictionary *allGroups);
+typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSArray *results, NSDictionary *allGroups);
 
 @interface KRSMO : NSObject
 
@@ -39,7 +39,7 @@ typedef void(^KRSMODirectOutput)(NSArray *weights, NSArray *biases, NSDictionary
 -(void)addPatterns:(NSArray *)_inputs target:(double)_output;
 -(void)addBias:(NSNumber *)_lineBias;
 -(void)addWeights:(NSArray *)_lineWeights;
--(void)addGroupForTarget:(double)_groupTarget;
+-(void)addGroupOfTarget:(double)_groupTarget;
 
 #pragma --mark Training Methods
 -(void)classify;

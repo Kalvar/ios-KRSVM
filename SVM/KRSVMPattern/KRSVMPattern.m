@@ -114,4 +114,9 @@
     return _targetValue >= 0.0f;
 }
 
+-(NSNumber *)classifiedTarget
+{
+    return [NSNumber numberWithDouble:_targetValue];
+}
+
 @end

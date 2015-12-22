@@ -16,6 +16,7 @@
 @property (nonatomic, assign) double errorValue;
 @property (nonatomic, assign) double toleranceError;
 @property (nonatomic, assign) BOOL isMatchKkt;
+@property (nonatomic, strong) NSNumber *classifiedTarget;
 // To record what index number in patterns of parent class and it could be ID Key
 @property (nonatomic, assign) NSInteger index;
 // To identify the singal of target value is + or -

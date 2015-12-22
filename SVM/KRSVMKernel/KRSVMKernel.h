@@ -25,8 +25,8 @@ typedef enum KRSVMKernelFunctions
 +(instancetype)sharedKernel;
 -(instancetype)init;
 
--(double)sgn:(double)_value;
--(double)kernelWithFeatures1:(NSArray *)_features1 features2:(NSArray *)_features2;
+-(double)normalizeValue:(double)_value;
+-(double)kernelOfFeatures1:(NSArray *)_features1 features2:(NSArray *)_features2;
 
 -(void)useLinear;
 -(void)useRBF;

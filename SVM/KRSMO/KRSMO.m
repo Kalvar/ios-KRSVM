@@ -61,11 +61,11 @@ typedef enum KRSMOTrainingTypes
     }
 }
 
--(void)_blockDirectOutputForTargetGroups:(NSDictionary *)_targetGroups finalResults:(NSDictionary *)_results
+-(void)_blockDirectOutputResults:(NSArray *)_results allGroups:(NSDictionary *)_allGroups
 {
     if( nil != self.directOutput )
     {
-        self.directOutput(self.weights, self.biases, _targetGroups, _results);
+        self.directOutput(self.weights, self.biases, _results, _allGroups);
     }
 }
 
@@ -89,7 +89,7 @@ typedef enum KRSMOTrainingTypes
         for( KRSVMPattern *_otherPattern in _patterns )
         {
             // _sumX : 求 xi 與其它 xj 點的乘積 (含 xi 自己)，同時做 Kernel()
-            double _sumX         = [_kernel kernelWithFeatures1:_pattern.features features2:_otherPattern.features];
+            double _sumX         = [_kernel kernelOfFeatures1:_pattern.features features2:_otherPattern.features];
             double _targetValue  = _otherPattern.targetValue;
             double _alphaValue   = _otherPattern.alphaValue;
             _errorValue         += ( _targetValue * _alphaValue * _sumX );
@@ -300,15 +300,15 @@ typedef enum KRSMOTrainingTypes
             // Calculating the main-pattern bias
             double _newMainBias = _biasValue
             - _mainPattern.errorValue
-            - ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [_kernel kernelWithFeatures1:_mainPattern.features features2:_mainPattern.features] )
-            - ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [_kernel kernelWithFeatures1:_matchPattern.features features2:_mainPattern.features] );
+            - ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [_kernel kernelOfFeatures1:_mainPattern.features features2:_mainPattern.features] )
+            - ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [_kernel kernelOfFeatures1:_matchPattern.features features2:_mainPattern.features] );
             
             // new bias 2 = old bias - error2 - (new alpha 1 - old alpha 1) * target1 * (x1^T * x2) - (new alpha2 - old alpha2) * target2 * (x2^T * x2)
             // Calculatin the match-pattern bias
             double _newMatchBias = _biasValue
             - _matchPattern.errorValue
-            - ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [_kernel kernelWithFeatures1:_mainPattern.features features2:_matchPattern.features] )
-            - ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [_kernel kernelWithFeatures1:_matchPattern.features features2:_matchPattern.features] );
+            - ( ( _newMainAlpha - _mainPattern.alphaValue ) * _mainPattern.targetValue * [_kernel kernelOfFeatures1:_mainPattern.features features2:_matchPattern.features] )
+            - ( ( _newMatchAlpha - _matchPattern.alphaValue ) * _matchPattern.targetValue * [_kernel kernelOfFeatures1:_matchPattern.features features2:_matchPattern.features] );
             
             // Then, to choose the final bias or to get the average value of biases
             _mainPattern.alphaValue  = _newMainAlpha;
@@ -511,6 +511,7 @@ typedef enum KRSMOTrainingTypes
     [self addPatterns:_inputs
                target:_output
                 alpha:DEFAULT_PATTERN_ALPHA_VALUE];
+    //[self addGroupForTarget:_output];
 }
 
 -(void)addBias:(NSNumber *)_lineBias
@@ -523,11 +524,15 @@ typedef enum KRSMOTrainingTypes
     [_weights addObject:[_lineWeights copy]];
 }
 
--(void)addGroupForTarget:(double)_groupTarget
+-(void)addGroupOfTarget:(double)_groupTarget
 {
     // 這裡設定了想分成幾群及該群的目標值
     // Value is that group patterns, Key is that group target value
-    [_groups setValue:[NSMutableArray new] forKey:[[NSNumber numberWithDouble:_groupTarget] copy]];
+    if( nil == [_groups objectForKey:[NSNumber numberWithDouble:_groupTarget]] )
+    {
+        [_groups setValue:[NSMutableArray new] forKey:[[NSNumber numberWithDouble:_groupTarget] copy]];
+        return;
+    }
 }
 
 #pragma --mark Training Methods
@@ -557,16 +562,16 @@ typedef enum KRSMOTrainingTypes
 
 -(void)classifyPatterns:(NSArray *)_samples completion:(KRSMODirectOutput)_completion
 {
+    _directOutput = _completion;
+    
     // Directly output the target value by formula : yi = (W^T * xi + b) or (W^T * xi - b)
-#warning 先來把 Kernel 寫完，再想想這裡怎麼設計會比較好 ~
     NSArray *_choseWeights        = [_weights firstObject];
     double _biasValue             = [[_biases firstObject] doubleValue];
     NSMutableArray *_waitPatterns = [NSMutableArray new];
     for( NSArray *_features in _samples )
     {
         KRSVMPattern *_pattern = [self createPatternByFeatures:_features];
-        
-        // 同時計算目標推估值
+        // 計算目標推估值
         double _targetValue    = 0.0f;
         NSInteger _index       = -1;
         for( NSNumber *_weightValue in _choseWeights )
@@ -574,32 +579,25 @@ typedef enum KRSMOTrainingTypes
             ++_index;
             _targetValue += ( [_weightValue doubleValue] * [[_features objectAtIndex:_index] doubleValue] ) + _biasValue;
         }
-        
+        _targetValue         = [_kernel normalizeValue:_targetValue];
         _pattern.targetValue = _targetValue;
-        
-        NSLog(@"_targetValue : %lf", _targetValue);
-        
         [_waitPatterns addObject:_pattern];
+        //NSLog(@"_targetValue : %lf", _targetValue);
     }
     
-    
-    
-    return;
-    
     // 直接 Output @[KRPatterns]，讓外部用 KRPattern.targetValue 來知道其分到哪一類
-    [self _blockDirectOutputForTargetGroups:@{}
-                               finalResults:[self _classifyPatterns:_waitPatterns]];
-    
+    [self _blockDirectOutputResults:[_waitPatterns copy]
+                          allGroups:[self _classifyPatterns:_waitPatterns]];
 }
 
 -(void)verifyPatterns:(NSArray *)_samples
 {
-
+    // TODO : to verify the predication-accuracy of samples by trained SVM model. (驗證模型的預測準度)
 }
 
 -(void)print
 {
-
+    NSLog(@"classified patterns : %@", _groups);
 }
 
 -(void)clean

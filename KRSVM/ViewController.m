@@ -22,7 +22,8 @@
     smo.toleranceError = 0.001f;
     smo.maxIteration   = 1000;
     smo.constValue     = 1;
-    [smo.kernel useLinear];
+//    [smo.kernel useLinear];
+
     
     [smo addPatterns:@[@0.0f, @0.0f] target:-1.0f]; // x1
     [smo addPatterns:@[@2.0f, @2.0f] target:-1.0f]; // x2
@@ -36,8 +37,8 @@
     [smo addWeights:@[@0.0f, @0.0f]];
     
     // Setup the groups of classification and the target-value of group
-    [smo addGroupForTarget:-1.0f];
-    [smo addGroupForTarget:1.0f];
+    [smo addGroupOfTarget:-1.0f];
+    [smo addGroupOfTarget:1.0f];
     
     [smo classifyWithPerIteration:^(NSInteger iteration, NSArray *weights, NSArray *biases) {
         //NSLog(@"%li Iteration weights : %@", iteration, weights);
@@ -47,15 +48,18 @@
         NSLog(@"%li Completion weights : %@", totalIterations, weights);
         NSLog(@"%li Completion biases : %@", totalIterations, biases);
         NSLog(@"%li Completion groups : %@", totalIterations, groups);
-        
+        NSLog(@"===============================================");
         // Verify & Directly Output
-        [smo classifyPatterns:@[@[@2.0f, @2.0f], @[@3.0f, @0.0f]] completion:^(NSArray *weights, NSArray *biases, NSDictionary *targetGroups, NSDictionary *allGroups) {
-            
+        [smo classifyPatterns:@[@[@2.0f, @2.0f], @[@3.0f, @0.0f]] completion:^(NSArray *weights, NSArray *biases, NSArray *results, NSDictionary *allGroups) {
+            for( KRSVMPattern *pattern in results )
+            {
+                NSLog(@"direct classify to target %@", pattern.classifiedTarget);
+            }
+            NSLog(@"all groups : %@", allGroups);
         }];
     }];
     
-    [smo print];
-    
+    //[smo print];
 }
 
 - (void)didReceiveMemoryWarning {

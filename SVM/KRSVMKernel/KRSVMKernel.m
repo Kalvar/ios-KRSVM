@@ -6,12 +6,20 @@
 //  Copyright © 2015年 Kalvar Lin. All rights reserved.
 //
 
-#define DEFAULT_COMMON_ALPHA_VALUE  1.0f
 #define DEFAULT_SIGMOID_ALPHA_VALUE 1.0f
-#define DEFAULT_TANGENT_ALPHA_VALUE 2.0f
-#define DEFAULT_RBF_SIGMA_VALUE     0.5f
+#define DEFAULT_TANGENT_ALPHA_VALUE 1.0f
+#define DEFAULT_RBF_SIGMA_VALUE     2.0f
 
 #import "KRSVMKernel.h"
+
+@implementation KRSVMKernel (fixNormalization)
+
+-(double)sgn:(double)_value
+{
+    return ( _value >= 0.0f ) ? 1.0f : -1.0f;
+}
+
+@end
 
 @implementation KRSVMKernel (fixKernels)
 
@@ -39,7 +47,7 @@
         ++_index;
     }
     // Formula : exp^( -s / ( 2.0f * sigma * sigma ) )
-    return pow(M_E, (-_sum / ( 2.0f * self.sigma * self.sigma )));
+    return pow(M_E, ((-_sum) / ( 2.0f * self.sigma * self.sigma )));
 }
 
 -(double)sigmoid:(NSArray *)_features1 features2:(NSArray *)_features2
@@ -48,6 +56,7 @@
     return ( 1.0f / ( 1.0f + pow(M_E, (-self.alpha * _sum)) ) );
 }
 
+// Formula is “ ( 2.0 / (1.0 + e^(-alpha * x)) ) - 1.0 “, alpha is default 1.0, the alpha value 越大則曲線越平滑
 -(double)tangent:(NSArray *)_features1 features2:(NSArray *)_features2
 {
     double _sum = [self linear:_features1 features2:_features2];
@@ -76,22 +85,40 @@
         _useKernel = KRSVMKernelFunctionLinear;
         
         // Sigmoid default value is 1.0f
-        // Tangent default value is 2.0f
+        // Tangent default value is 1.0f that better than 2.0f
         // We will set up alpha, sigma default value when we setup kernel function
-        _alpha     = DEFAULT_COMMON_ALPHA_VALUE;
+        _alpha     = DEFAULT_SIGMOID_ALPHA_VALUE;
+        
+        // RBF that default sigma value is 2.0f that is better, but some papers said 0.5f, we used 2.0f in here
         _sigma     = DEFAULT_RBF_SIGMA_VALUE;
     }
     return self;
 }
 
 #pragma --mark Normorlizion
--(double)sgn:(double)_value
+-(double)normalizeValue:(double)_value
 {
-    return ( _value >= 0.0f ) ? 1.0f : -1.0f;
+    // It should not only Linear need to normalize its target value to (-1, 1), try to normalize all first,
+    // and we will change the rule later.
+    return [self sgn:_value];
+    
+    /*
+    double _v = _value;
+    switch (_useKernel)
+    {
+        // Linear needs to normalize its target value to (-1, 1)
+        case KRSVMKernelFunctionLinear:
+            _v = [self sgn:_value];
+            break;
+        default:
+            break;
+    }
+    return _v;
+     */
 }
 
 #pragma --mark Kernel Functions
--(double)kernelWithFeatures1:(NSArray *)_features1 features2:(NSArray *)_features2
+-(double)kernelOfFeatures1:(NSArray *)_features1 features2:(NSArray *)_features2
 {
     double _kernelValue = 0.0f;
     switch (_useKernel)
