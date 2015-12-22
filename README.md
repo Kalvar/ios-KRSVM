@@ -27,14 +27,14 @@ KRSMO *smo = [[KRSVM sharedSVM] useSMO];
 ```
 
 #### Use RBF Kernel Function
-The sigma that could be customized by your wishes, default value is 2.0, but some papers said 0.5.
+The sigma that could be customized by your wishes, default value is 2.0, but some papers said 0.5, 1.0, 3.0, 5.0 that all can do training. Anyway, just try, nothing else.
 ``` objective-c
 [smo.kernel useRBF];
 smo.kernel.sigma = 2.0f;
 ```
 
 #### Use Tangent (tanh) Kernel Function
-The alpha of tangent could be customized by your wishes, default value is 1.0, but sometimes to be 2.0 is better, in this sample case we used 0.8f to do regression.
+The alpha of tangent could be customized by your wishes, default value is 1.0, but sometimes to be 2.0 is better, in this sample case we used 0.8 to do regression.
 ``` objective-c
 [smo.kernel useTangent];
 smo.kernel.alpha = 0.8f;
