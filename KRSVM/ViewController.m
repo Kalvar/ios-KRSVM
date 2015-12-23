@@ -22,9 +22,13 @@
     smo.toleranceError = 0.001f;
     smo.maxIteration   = 1000;
     smo.constValue     = 1;
-//    [smo.kernel useLinear];
-
+    [smo.kernel useLinear];
     
+    // Setup the groups of classification and the target-value of group
+    [smo addGroupOfTarget:-1.0f];
+    [smo addGroupOfTarget:1.0f];
+    
+    // Patterns
     [smo addPatterns:@[@0.0f, @0.0f] target:-1.0f]; // x1
     [smo addPatterns:@[@2.0f, @2.0f] target:-1.0f]; // x2
     [smo addPatterns:@[@2.0f, @0.0f] target:1.0f];  // x3
@@ -35,10 +39,6 @@
     
     // One input value by one weight that likes inputs & weights of neural network
     [smo addWeights:@[@0.0f, @0.0f]];
-    
-    // Setup the groups of classification and the target-value of group
-    [smo addGroupOfTarget:-1.0f];
-    [smo addGroupOfTarget:1.0f];
     
     [smo classifyWithPerIteration:^(NSInteger iteration, NSArray *weights, NSArray *biases) {
         //NSLog(@"%li Iteration weights : %@", iteration, weights);

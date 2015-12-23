@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
   s.version      = "1.0.0"
   s.summary      = "KRSVM is implemented SVM of machine learning."
   s.description  = <<-DESC
-                   KRSVM is implemented Support Vector Machine.
+                   KRSVM is implemented Support Vector Machine (SVM) of machine learning, it current achieved SMO and RBF, Tangent, Linear these 3 kernel functions to do predication.
                    DESC
   s.homepage     = "https://github.com/Kalvar/ios-KRSVM"
   s.license      = { :type => 'MIT', :file => 'LICENSE' }
@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/Kalvar/ios-KRSVM.git", :tag => s.version.to_s }
   s.platform     = :ios, '7.0'
   s.requires_arc = true
-  s.public_header_files = 'SVM/*.h'
-  s.source_files = 'SVM/*.{h,m}'
+  s.public_header_files = 'SVM/**/*.h'
+  s.source_files = 'SVM/**/*.{h,m}'
   s.frameworks   = 'Foundation'
 end 
