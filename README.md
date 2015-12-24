@@ -33,10 +33,10 @@ The sigma that could be customized by your wishes, default value is 2.0, but som
 smo.kernel.sigma = 2.0f;
 ```
 
-#### Use Tangent (tanh) Kernel Function
+#### Use Hyperbolic Tangent (tanh) Kernel Function
 The alpha of tangent could be customized by your wishes, default value is 1.0, but sometimes to be 2.0 is better, in this sample case we used 0.8 to do regression.
 ``` objective-c
-[smo.kernel useTangent];
+[smo.kernel useTanh];
 smo.kernel.alpha = 0.8f;
 ```
     

@@ -7,7 +7,7 @@
 //
 
 #define DEFAULT_SIGMOID_ALPHA_VALUE 1.0f
-#define DEFAULT_TANGENT_ALPHA_VALUE 1.0f
+#define DEFAULT_TANH_ALPHA_VALUE    1.0f
 #define DEFAULT_RBF_SIGMA_VALUE     2.0f
 
 #import "KRSVMKernel.h"
@@ -57,7 +57,7 @@
 }
 
 // Formula is “ ( 2.0 / (1.0 + e^(-alpha * x)) ) - 1.0 “, alpha is default 1.0, the alpha value 越大則曲線越平滑
--(double)tangent:(NSArray *)_features1 features2:(NSArray *)_features2
+-(double)tanh:(NSArray *)_features1 features2:(NSArray *)_features2
 {
     double _sum = [self linear:_features1 features2:_features2];
     return ( 2.0f / ( 1.0f + pow(M_E, (-self.alpha * _sum)) ) ) - 1.0f;
@@ -85,7 +85,7 @@
         _useKernel = KRSVMKernelFunctionLinear;
         
         // Sigmoid default value is 1.0f
-        // Tangent default value is 1.0f that better than 2.0f
+        // Hyperbolic Tangent default value is 1.0f that better than 2.0f
         // We will set up alpha, sigma default value when we setup kernel function
         _alpha     = DEFAULT_SIGMOID_ALPHA_VALUE;
         
@@ -129,8 +129,8 @@
         case KRSVMKernelFunctionSigmoid:
             _kernelValue = [self sigmoid:_features1 features2:_features2];
             break;
-        case KRSVMKernelFunctionTangent:
-            _kernelValue = [self tangent:_features1 features2:_features2];
+        case KRSVMKernelFunctionTanh:
+            _kernelValue = [self tanh:_features1 features2:_features2];
             break;
         case KRSVMKernelFunctionLinear:
         default:
@@ -155,9 +155,10 @@
     self.useKernel = KRSVMKernelFunctionSigmoid;
 }
 
--(void)useTangent
+// Hyperbolic Tangent
+-(void)useTanh
 {
-    self.useKernel = KRSVMKernelFunctionTangent;
+    self.useKernel = KRSVMKernelFunctionTanh;
 }
 
 #pragma --mark Setters
@@ -172,8 +173,8 @@
         case KRSVMKernelFunctionSigmoid:
             _alpha = DEFAULT_SIGMOID_ALPHA_VALUE;
             break;
-        case KRSVMKernelFunctionTangent:
-            _alpha = DEFAULT_TANGENT_ALPHA_VALUE;
+        case KRSVMKernelFunctionTanh:
+            _alpha = DEFAULT_TANH_ALPHA_VALUE;
             break;
         case KRSVMKernelFunctionLinear:
         default:

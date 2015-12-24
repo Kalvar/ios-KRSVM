@@ -10,10 +10,10 @@
 
 typedef enum KRSVMKernelFunctions
 {
-    KRSVMKernelFunctionLinear = 0,
-    KRSVMKernelFunctionRBF,
-    KRSVMKernelFunctionSigmoid,
-    KRSVMKernelFunctionTangent
+    KRSVMKernelFunctionLinear = 0, // Linear, 線性函式
+    KRSVMKernelFunctionRBF,        // Radial Basis Function, 徑向基函式
+    KRSVMKernelFunctionSigmoid,    // Sigmoid, S 形曲線函式
+    KRSVMKernelFunctionTanh        // Hyperbolic Tangent, 雙曲線正切函式
 }KRSVMKernelFunctions;
 
 @interface KRSVMKernel : NSObject
@@ -31,6 +31,6 @@ typedef enum KRSVMKernelFunctions
 -(void)useLinear;
 -(void)useRBF;
 -(void)useSigmoid;
--(void)useTangent;
+-(void)useTanh;
 
 @end
