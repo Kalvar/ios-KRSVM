@@ -18,11 +18,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    KRSMO *smo         = [[KRSVM sharedSVM] useSMO];
-    smo.toleranceError = 0.001f;
-    smo.maxIteration   = 1000;
-    smo.constValue     = 1;
-    [smo.kernel useLinear];
+    KRSMO *smo           = [[KRSVM sharedSVM] useSMO];
+    smo.toleranceError   = 0.001f;
+    smo.maxIteration     = 1000;
+    smo.constValue       = 1;
+    smo.kernel.useKernel = KRSVMKernelFunctionLinear; // 這樣用比較好 XD
     
     // Setup the groups of classification and the target-value of group
     [smo addGroupOfTarget:-1.0f];
