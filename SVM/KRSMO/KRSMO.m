@@ -394,8 +394,10 @@ typedef enum KRSMOTrainingTypes
 // 找出要更新的 Pattern Alphas
 -(void)_findWannaUpdateAlphasByWaitUpdateAlphas:(NSArray *)_waitUpdates
 {
+    // 沒有 Pattern 要被更新，等同所有的點都已符合 KKT 條件
     if( [_waitUpdates count] < 1 )
     {
+        [self _blockCompletedTrainingBySucceed:YES finalResults:[self _classifyPatterns:self.patterns]];
         return;
     }
     /*
